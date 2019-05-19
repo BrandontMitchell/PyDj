@@ -1,5 +1,5 @@
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QPushButton, QAction
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QPushButton, QAction, QLineEdit, QLabel
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QSize
 import sys
@@ -11,6 +11,13 @@ class MainWindow(QMainWindow):
     WINDOW_Y_LOC = 500
     WINDOW_WIDTH = 1500
     WINDOW_HEIGHT = 800
+
+    # Song description text locs
+    SONG_DESC_X = WINDOW_X_LOC/5
+    SONG_DESC_Y = WINDOW_Y_LOC/5
+    SONG_DESC_WIDTH = 80
+    SONG_DISC_HEIGHT = 40
+
 
     # Import Button Locs
     IMPORT_BTN_X = WINDOW_X_LOC/5
@@ -28,15 +35,8 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QIcon('icon.jpg'))
         self.createButton(self.IMPORT_BTN_X, self.IMPORT_BTN_Y, self.IMPORT_BTN_WIDTH, self.IMPORT_BTN_HEIGHT, 'IMPORT')
         self.createMenu()
+        self.createTextBox(self.SONG_DESC_X, self.SONG_DESC_Y, self.SONG_DESC_WIDTH, self.SONG_DISC_HEIGHT, "ARTIST")
         self.show()
-
-
-    def createButton(self, x, y, width, height, title):
-        button = QPushButton(title, self)
-        button.clicked.connect(QApplication.instance().quit)
-        button.resize(width, height)
-        button.move(x,y)
-
 
     def createMenu(self):
         newAction = QAction(QIcon('new.png'), '&New', self)
@@ -44,7 +44,7 @@ class MainWindow(QMainWindow):
         newAction.setStatusTip('New File')
         newAction.triggered.connect(self.newCall)
 
-        openAction = QAction(QIcon('open.jpg'), '&Open', self)
+        openAction = QAction(QIcon('open.png'), '&Open', self)
         openAction.setShortcut('Ctrl+O')
         openAction.setStatusTip('Open File')
         openAction.triggered.connect(self.openCall)
@@ -59,6 +59,24 @@ class MainWindow(QMainWindow):
         fileMenu.addAction(newAction)
         fileMenu.addAction(openAction)
         fileMenu.addAction(exitAction)
+
+
+    def createButton(self, x, y, width, height, title):
+        button = QPushButton(title, self)
+        button.clicked.connect(QApplication.instance().quit)
+        button.resize(width, height)
+        button.move(x,y)
+
+    def createTextBox(self, x, y, width, height, title):
+        self.nameLabel = QLabel(self)
+        self.nameLabel.setText(title)
+        self.line = QLineEdit(self)
+
+        self.line.move(x,y)
+        self.line.resize(width,height)
+        self.nameLabel.move(x-50,y)
+
+    
 
 
 
