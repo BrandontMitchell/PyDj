@@ -14,15 +14,17 @@ class MainWindow(QMainWindow):
     WINDOW_HEIGHT = 800
 
     # Song description text locs
-    SONG_DESC_X = WINDOW_X_LOC/5
-    SONG_DESC_Y = WINDOW_Y_LOC/5
+    SONG_DESC_X = 100
+    SONG_DESC_Y = 150
     SONG_DESC_WIDTH = 80
-    SONG_DISC_HEIGHT = 40
+    SONG_DISC_HEIGHT = 30
+    ARTIST_DESC_X = 100
+    ARTIST_DESC_Y = 75
 
 
     # Import Button Locs
-    IMPORT_BTN_X = WINDOW_X_LOC/5
-    IMPORT_BTN_Y = WINDOW_Y_LOC
+    IMPORT_BTN_X = 100
+    IMPORT_BTN_Y = 225
     IMPORT_BTN_WIDTH = 80
     IMPORT_BTN_HEIGHT = 40
 
@@ -34,9 +36,10 @@ class MainWindow(QMainWindow):
         self.setGeometry(self.WINDOW_X_LOC, self.WINDOW_Y_LOC, self.WINDOW_WIDTH, self.WINDOW_HEIGHT) #(x,y, width, height)
         self.setWindowTitle('PYDJ')
         self.setWindowIcon(QIcon('icon.jpg'))
-        self.createButton(self.IMPORT_BTN_X, self.IMPORT_BTN_Y, self.IMPORT_BTN_WIDTH, self.IMPORT_BTN_HEIGHT, 'IMPORT')
+        self.createButton(self.IMPORT_BTN_X, self.IMPORT_BTN_Y, self.IMPORT_BTN_WIDTH, self.IMPORT_BTN_HEIGHT, 'IMPORT', self.getTitle)
         self.createMenu()
-        self.createTextBox(self.SONG_DESC_X, self.SONG_DESC_Y, self.SONG_DESC_WIDTH, self.SONG_DISC_HEIGHT, "ARTIST")
+        self.createTextBox(self.SONG_DESC_X, self.SONG_DESC_Y, self.SONG_DESC_WIDTH, self.SONG_DISC_HEIGHT, "Artist")
+        self.createTextBox(self.ARTIST_DESC_X, self.ARTIST_DESC_Y, self.SONG_DESC_WIDTH, self.SONG_DISC_HEIGHT, "Song Title")
         self.show()
 
     def createMenu(self):
@@ -65,9 +68,9 @@ class MainWindow(QMainWindow):
         fileMenu.addAction(exitAction)
 
 
-    def createButton(self, x, y, width, height, title):
+    def createButton(self, x, y, width, height, title, func):
         button = QPushButton(title, self)
-        button.clicked.connect(QApplication.instance().quit)
+        button.clicked.connect(self.getTitle)
         button.resize(width, height)
         button.move(x,y)
 
@@ -78,13 +81,16 @@ class MainWindow(QMainWindow):
 
         self.line.move(x,y)
         self.line.resize(width,height)
-        self.nameLabel.move(x-100,y)
+        self.nameLabel.move(x-85,y)
 
     
 
 
 
 
+    def getTitle(self):
+        title = self.line.text()
+        print(title)
 
 
     def newCall(self):
