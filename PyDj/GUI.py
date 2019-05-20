@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QPushButton, QAc
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QSize
 import sys
+import os
 
 class MainWindow(QMainWindow):
 
@@ -39,17 +40,20 @@ class MainWindow(QMainWindow):
         self.show()
 
     def createMenu(self):
-        newAction = QAction(QIcon('new.png'), '&New', self)
+        new_icon = os.path.join("Assets", "new.png") 
+        newAction = QAction(QIcon(new_icon), '&New', self)
         newAction.setShortcut('Ctrl+N')
         newAction.setStatusTip('New File')
         newAction.triggered.connect(self.newCall)
 
-        openAction = QAction(QIcon('open.png'), '&Open', self)
+        open_icon = os.path.join("Assets", "open.png") 
+        openAction = QAction(QIcon(open_icon), '&Open', self)
         openAction.setShortcut('Ctrl+O')
         openAction.setStatusTip('Open File')
         openAction.triggered.connect(self.openCall)
 
-        exitAction = QAction(QIcon('exit.png'), '&Exit', self)
+        exit_icon = os.path.join("Assets", "exit.png") 
+        exitAction = QAction(QIcon(exit_icon), '&Exit', self)
         exitAction.setShortcut('Ctrl+Q')
         exitAction.setStatusTip('Exit File')
         exitAction.triggered.connect(self.exitCall)       
@@ -74,7 +78,7 @@ class MainWindow(QMainWindow):
 
         self.line.move(x,y)
         self.line.resize(width,height)
-        self.nameLabel.move(x-50,y)
+        self.nameLabel.move(x-100,y)
 
     
 
