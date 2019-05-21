@@ -38,8 +38,8 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QIcon('icon.jpg'))
         self.createButton(self.IMPORT_BTN_X, self.IMPORT_BTN_Y, self.IMPORT_BTN_WIDTH, self.IMPORT_BTN_HEIGHT, 'IMPORT', self.getTitle)
         self.createMenu()
-        self.createTextBox(self.SONG_DESC_X, self.SONG_DESC_Y, self.SONG_DESC_WIDTH, self.SONG_DISC_HEIGHT, "Artist")
-        self.createTextBox(self.ARTIST_DESC_X, self.ARTIST_DESC_Y, self.SONG_DESC_WIDTH, self.SONG_DISC_HEIGHT, "Song Title")
+        self.createArtistTextBox(self.SONG_DESC_X, self.SONG_DESC_Y, self.SONG_DESC_WIDTH, self.SONG_DISC_HEIGHT, "Artist")
+        self.createSongTextBox(self.ARTIST_DESC_X, self.ARTIST_DESC_Y, self.SONG_DESC_WIDTH, self.SONG_DISC_HEIGHT, "Song Title")
         self.show()
 
     def createMenu(self):
@@ -74,23 +74,32 @@ class MainWindow(QMainWindow):
         button.resize(width, height)
         button.move(x,y)
 
-    def createTextBox(self, x, y, width, height, title):
+    def createArtistTextBox(self, x, y, width, height, title):
         self.nameLabel = QLabel(self)
         self.nameLabel.setText(title)
-        self.line = QLineEdit(self)
+        self.artistLine = QLineEdit(self)
 
-        self.line.move(x,y)
-        self.line.resize(width,height)
+        self.artistLine.move(x,y)
+        self.artistLine.resize(width,height)
         self.nameLabel.move(x-85,y)
 
-    
+    def createSongTextBox(self, x, y, width, height, title):
+        self.songLabel = QLabel(self)
+        self.songLabel.setText(title)
+        self.songLine = QLineEdit(self)
+
+        self.songLine.move(x,y)
+        self.songLine.resize(width,height)
+        self.songLabel.move(x-85,y)
 
 
 
 
     def getTitle(self):
-        title = self.line.text()
-        print(title)
+        artist = self.artistLine.text()
+        song = self.songLine.text()
+        print(f'Artist: {artist}')
+        print(f'Song: {song}')
 
 
     def newCall(self):
