@@ -1,13 +1,14 @@
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QFileDialog, QPushButton, QAction, QSizePolicy, QLineEdit, QLabel
-from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QSize
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure 
 import matplotlib.pyplot as plt 
+import numpy
 import random 
-import thinkdsp
-import thinkplot
+import librosa
+import librosa.display
 import sys
 import os
 
@@ -100,14 +101,13 @@ class MainWindow(QMainWindow):
         self.songLine.move(x,y)
         self.songLine.resize(width,height)
         self.songLabel.move(x-85,y)
+        
 
     def openFile(self):
         name = QFileDialog.getOpenFileName(self, 'Open File')
-        file = open(name, 'r')
-
-        with file:
-            text = file.read()
-            print(str(text))
+        y, sr = librosa.load(name[0])
+        tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
+        print('Estimated temp: {:.2f} beats per minute'.format(tempo))
 
 
     def getAudioInput(self):
