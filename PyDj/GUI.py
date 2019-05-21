@@ -1,7 +1,13 @@
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QPushButton, QAction, QLineEdit, QLabel
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QFileDialog, QPushButton, QAction, QSizePolicy, QLineEdit, QLabel
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QSize
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure 
+import matplotlib.pyplot as plt 
+import random 
+import thinkdsp
+import thinkplot
 import sys
 import os
 
@@ -36,10 +42,12 @@ class MainWindow(QMainWindow):
         self.setGeometry(self.WINDOW_X_LOC, self.WINDOW_Y_LOC, self.WINDOW_WIDTH, self.WINDOW_HEIGHT) #(x,y, width, height)
         self.setWindowTitle('PYDJ')
         self.setWindowIcon(QIcon('icon.jpg'))
-        self.createButton(self.IMPORT_BTN_X, self.IMPORT_BTN_Y, self.IMPORT_BTN_WIDTH, self.IMPORT_BTN_HEIGHT, 'IMPORT', self.getTitle)
+        self.createButton(self.IMPORT_BTN_X, self.IMPORT_BTN_Y, self.IMPORT_BTN_WIDTH, self.IMPORT_BTN_HEIGHT, 'IMPORT')
         self.createMenu()
         self.createArtistTextBox(self.SONG_DESC_X, self.SONG_DESC_Y, self.SONG_DESC_WIDTH, self.SONG_DISC_HEIGHT, "Artist")
         self.createSongTextBox(self.ARTIST_DESC_X, self.ARTIST_DESC_Y, self.SONG_DESC_WIDTH, self.SONG_DISC_HEIGHT, "Song Title")
+        # m = PlotCanvas(self, width=5, height=4)
+        # m.move(200, 200)
         self.show()
 
     def createMenu(self):
@@ -68,9 +76,10 @@ class MainWindow(QMainWindow):
         fileMenu.addAction(exitAction)
 
 
-    def createButton(self, x, y, width, height, title, func):
+    def createButton(self, x, y, width, height, title):
         button = QPushButton(title, self)
         button.clicked.connect(self.getTitle)
+        button.clicked.connect(self.openFile)
         button.resize(width, height)
         button.move(x,y)
 
@@ -92,7 +101,17 @@ class MainWindow(QMainWindow):
         self.songLine.resize(width,height)
         self.songLabel.move(x-85,y)
 
+    def openFile(self):
+        name = QFileDialog.getOpenFileName(self, 'Open File')
+        file = open(name, 'r')
 
+        with file:
+            text = file.read()
+            print(str(text))
+
+
+    def getAudioInput(self):
+        testFileOne = os.path.join("Audio Files", "test1.wav") 
 
 
     def getTitle(self):
@@ -100,6 +119,12 @@ class MainWindow(QMainWindow):
         song = self.songLine.text()
         print(f'Artist: {artist}')
         print(f'Song: {song}')
+
+
+    
+
+
+
 
 
     def newCall(self):
@@ -113,7 +138,27 @@ class MainWindow(QMainWindow):
     
 
     
+class PlotCanvas(FigureCanvas):
 
+    def __init__(self, parent=None, width=5, height=4, dpi=100):
+        fig = Figure(figsize = (width, height), dpi=dpi)
+        self.axes=fig.add_subplot(111)
+
+        FigureCanvas.__init__(self, fig)
+        self.setParent(parent)
+
+        FigureCanvas.setSizePolicy(self, 
+                    QSizePolicy.Expanding,
+                    QSizePolicy.Expanding)
+        FigureCanvas.updateGeometry(self)
+        self.plot()
+
+    def plot(self):
+        sin_sig = thinkdsp.SinSignal(freq=880, amp=0.5, offset=0)
+        thinkplot.config(xlabel="time", legend=False)
+        wave = sin_sig.make_wave(duration=1, framerate=11025)
+        wave.plot()
+        thinkplot.show()
     
 
 if __name__ == "__main__":
