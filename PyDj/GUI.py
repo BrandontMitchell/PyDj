@@ -1,11 +1,12 @@
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QFileDialog, QPushButton, QAction, QSizePolicy, QLineEdit, QLabel
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QFileDialog, QVBoxLayout, QPushButton, QAction, QSizePolicy, QLineEdit, QLabel
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure 
 import matplotlib.pyplot as plt 
-import numpy
+import numpy as np
 import random 
 import librosa
 import librosa.display
@@ -17,8 +18,8 @@ class MainWindow(QMainWindow):
     # Window Reqs
     WINDOW_X_LOC = 500
     WINDOW_Y_LOC = 500
-    WINDOW_WIDTH = 1500
-    WINDOW_HEIGHT = 800
+    WINDOW_WIDTH = 1800
+    WINDOW_HEIGHT = 1000
 
     # Song description text locs
     SONG_DESC_X = 100
@@ -28,27 +29,35 @@ class MainWindow(QMainWindow):
     ARTIST_DESC_X = 100
     ARTIST_DESC_Y = 75
 
-
     # Import Button Locs
     IMPORT_BTN_X = 100
     IMPORT_BTN_Y = 225
     IMPORT_BTN_WIDTH = 80
     IMPORT_BTN_HEIGHT = 40
 
-    def __init__(self):
+    # Graph Locs
+    FREQ_GRAPH_X = WINDOW_X_LOC + 300
+    FREQ_GRAPH_BG_X = WINDOW_X_LOC + 290
+    FREQ_GRAPH_Y = WINDOW_Y_LOC + 100
+    FREQ_GRAPH_BG_Y = WINDOW_Y_LOC + 90
+    FREQ_GRAPH_BG_WIDTH = 150
+    FREQ_GRAPH_BG_HIEGHT = 100
+
+
+    def __init__(self, parent=None):
         super().__init__()
         self.initUI()
 
+
     def initUI(self):
+
         self.setGeometry(self.WINDOW_X_LOC, self.WINDOW_Y_LOC, self.WINDOW_WIDTH, self.WINDOW_HEIGHT) #(x,y, width, height)
         self.setWindowTitle('PYDJ')
-        self.setWindowIcon(QIcon('icon.jpg'))
+        self.setWindowIcon(QIcon(os.path.join("Assets", "icon.jpg")))
         self.createButton(self.IMPORT_BTN_X, self.IMPORT_BTN_Y, self.IMPORT_BTN_WIDTH, self.IMPORT_BTN_HEIGHT, 'IMPORT')
         self.createMenu()
         self.createArtistTextBox(self.SONG_DESC_X, self.SONG_DESC_Y, self.SONG_DESC_WIDTH, self.SONG_DISC_HEIGHT, "Artist")
         self.createSongTextBox(self.ARTIST_DESC_X, self.ARTIST_DESC_Y, self.SONG_DESC_WIDTH, self.SONG_DISC_HEIGHT, "Song Title")
-        # m = PlotCanvas(self, width=5, height=4)
-        # m.move(200, 200)
         self.show()
 
     def createMenu(self):
@@ -105,14 +114,22 @@ class MainWindow(QMainWindow):
 
     def openFile(self):
         name = QFileDialog.getOpenFileName(self, 'Open File')
-        self.generateMetrics(name[0])
+        self.getAudioMetrics(name[0])
+
+
 
 
 
 ##################      ANALYSIS     ##################
     
-    
-    def generateMetrics(self, filename):
+    def getTitle(self):
+        artist = self.artistLine.text()
+        song = self.songLine.text()
+        print(f'Artist: {artist}')
+        print(f'Song: {song}')
+
+
+    def getAudioMetrics(self, filename):
 
         y, sr = librosa.load(filename)
         tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
@@ -135,15 +152,16 @@ class MainWindow(QMainWindow):
         print('Estimated temp: {:.2f} beats per minute'.format(tempo))
         print()
         print(f'This falls under {genre} music')
-
-    def getTitle(self):
-        artist = self.artistLine.text()
-        song = self.songLine.text()
-        print(f'Artist: {artist}')
-        print(f'Song: {song}')
+        self.displayAudioMetrics(y, sr, self.FREQ_GRAPH_X, self.FREQ_GRAPH_Y)
 
 
-    
+    def displayAudioMetrics(self, arr, int, x, y):
+        librosa.display.waveplot(arr, sr=int)
+        mngr = plt.get_current_fig_manager()
+        mngr.window.setGeometry(x, y, 200, 200)
+        plt.show()
+        
+
 
 
 
@@ -157,33 +175,13 @@ class MainWindow(QMainWindow):
 
     def exitCall(self):
         sys.exit(app.exec_())
-    
 
-    
-class PlotCanvas(FigureCanvas):
 
-    def __init__(self, parent=None, width=5, height=4, dpi=100):
-        fig = Figure(figsize = (width, height), dpi=dpi)
-        self.axes=fig.add_subplot(111)
-
-        FigureCanvas.__init__(self, fig)
-        self.setParent(parent)
-
-        FigureCanvas.setSizePolicy(self, 
-                    QSizePolicy.Expanding,
-                    QSizePolicy.Expanding)
-        FigureCanvas.updateGeometry(self)
-        self.plot()
-
-    def plot(self):
-        sin_sig = thinkdsp.SinSignal(freq=880, amp=0.5, offset=0)
-        thinkplot.config(xlabel="time", legend=False)
-        wave = sin_sig.make_wave(duration=1, framerate=11025)
-        wave.plot()
-        thinkplot.show()
-    
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     ex = MainWindow()
+    ex.show()
     sys.exit(app.exec_())
+
+
