@@ -105,14 +105,36 @@ class MainWindow(QMainWindow):
 
     def openFile(self):
         name = QFileDialog.getOpenFileName(self, 'Open File')
-        y, sr = librosa.load(name[0])
+        self.generateMetrics(name[0])
+
+
+
+##################      ANALYSIS     ##################
+    
+    
+    def generateMetrics(self, filename):
+
+        y, sr = librosa.load(filename)
         tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
+        genre = ''
+        genreDict = {
+            'R&B/Slow': range(0,65),
+            'Hip Hop': range(65, 115),
+            'House': range(115, 130),
+            'Techno/EDM': range(130, 140),
+            'Dubstep': range(140, 160),
+            'Hardcore': range(160, 300)
+        }
+
+        # loops through genre dictionary to match bpm from input file
+        # to a specific genre, helpful when mixing
+        for key, value in genreDict.items():
+            if int(tempo) in value:
+                genre = key
+
         print('Estimated temp: {:.2f} beats per minute'.format(tempo))
-
-
-    def getAudioInput(self):
-        testFileOne = os.path.join("Audio Files", "test1.wav") 
-
+        print()
+        print(f'This falls under {genre} music')
 
     def getTitle(self):
         artist = self.artistLine.text()
