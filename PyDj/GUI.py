@@ -38,6 +38,8 @@ class MainWindow(QMainWindow):
     # Graph Locs
     GRAPH_BG_WIDTH = 700
     GRAPH_BG_HEIGHT = 400
+    GRAPH_WIDTH = 645
+    GRAPH_HEIGHT = 335
 
     FREQ_GRAPH_X = 320
     FREQ_GRAPH_BG_X = 290
@@ -54,10 +56,10 @@ class MainWindow(QMainWindow):
     BEAT_GRAPH_Y = 495
     BEAT_GRAPH_BG_Y = 440
 
-    MFCC_GRAPH_X = 
-    MFCC_GRAPH_BG_X =
-    MFCC_GRAPH_Y =
-    MFCC_GRAPH_BG_Y = 
+    MFCC_GRAPH_X = 1030
+    MFCC_GRAPH_BG_X = 1000
+    MFCC_GRAPH_Y = 495
+    MFCC_GRAPH_BG_Y = 440
 
     def __init__(self, parent=None):
         super().__init__()
@@ -76,7 +78,7 @@ class MainWindow(QMainWindow):
         self.graphBackground(self.FREQ_GRAPH_BG_X, self.FREQ_GRAPH_BG_Y, 'bgf.jpg')
         self.graphBackground(self.PITCH_GRAPH_BG_X, self.PITCH_GRAPH_BG_Y, 'bgf.jpg')
         self.graphBackground(self.BEAT_GRAPH_BG_X, self.BEAT_GRAPH_BG_Y, 'bgf.jpg')
-        self.graphBackground(self.PITCH_GRAPH_BG_X, self.PITCH_GRAPH_BG_Y, 'bgf.jpg')
+        self.graphBackground(self.MFCC_GRAPH_BG_X, self.MFCC_GRAPH_BG_Y, 'bgf.jpg')
         self.show()
 
     def createMenu(self):
@@ -174,17 +176,60 @@ class MainWindow(QMainWindow):
         print('Estimated temp: {:.2f} beats per minute'.format(tempo))
         print()
         print(f'This falls under {genre} music')
-        self.displayAudioMetrics(y, sr, self.FREQ_GRAPH_X, self.FREQ_GRAPH_Y)
+        self.displayFreqGraph(y, sr, self.FREQ_GRAPH_X, self.FREQ_GRAPH_Y)
+        self.displayPitchGraph(y, sr, self.PITCH_GRAPH_X, self.PITCH_GRAPH_Y)
+        self.displayBeatGraph(y, sr, self.BEAT_GRAPH_X, self.BEAT_GRAPH_Y)
+        # self.displayMFCCGraph()
 
-
-    def displayAudioMetrics(self, arr, int, x, y):
+    def displayFreqGraph(self, arr, int, x, y):
         librosa.display.waveplot(arr, sr=int)
+
+        plt.title("Freq Detection")
+
         mngr = plt.get_current_fig_manager()
-        mngr.window.setGeometry(x+self.WINDOW_X_LOC, y + self.WINDOW_Y_LOC, 645, 335)
+        mngr.window.setGeometry(x+self.WINDOW_X_LOC, y + self.WINDOW_Y_LOC, self.GRAPH_WIDTH, self.GRAPH_HEIGHT)
+        plt.tight_layout()
         plt.show()
         
+    def displayPitchGraph(self, arr, int, x, y):
+        y_harmonic, y_percussive = librosa.effects.hpss(arr)
+        C = librosa.feature.chroma_cqt(y=y_harmonic, sr=int)
+        
+        plt.figure(figsize=(12,4))
+        librosa.display.specshow(C, sr=int, x_axis='time', y_axis='chroma', vmin=0, vmax=1)
+        
+        plt.title("Pitch Detection - Chromagram")
+        plt.colorbar()
+        
+        mngr = plt.get_current_fig_manager()
+        mngr.window.setGeometry(x+self.WINDOW_X_LOC, y + self.WINDOW_Y_LOC, self.GRAPH_WIDTH, self.GRAPH_HEIGHT)
+        plt.tight_layout()
+        plt.show()
+        
+    def displayBeatGraph(self, arr, int, x, y):
+        y_harmonic, y_percussive = librosa.effects.hpss(arr)
+        S = librosa.feature.melspectrogram(arr, sr=int, n_mels=128)
+        log_S = librosa.power_to_db(S, ref=np.max)
+
+        plt.figure(figsize=(12,4))
+        tempo, beats = librosa.beat.beat_track(y=y_percussive, sr=int)
+        librosa.display.specshow(log_S, sr=int, x_axis='time', y_axis='mel')
+
+        plt.vlines(librosa.frames_to_time(beats),
+                    1, 0.5*int,
+                    colors='w', linestyles='-', linewidth=2, alpha=0.5)
+        plt.axis('tight')
+        plt.colorbar(format='%+02.0f dB')
+
+        mngr = plt.get_current_fig_manager()
+        mngr.window.setGeometry(x+self.WINDOW_X_LOC, y + self.WINDOW_Y_LOC, self.GRAPH_WIDTH, self.GRAPH_HEIGHT)
+        plt.tight_layout()
+        plt.show()
 
 
+
+    def displayMFCCGraph(self):
+        pass
 
 
 
