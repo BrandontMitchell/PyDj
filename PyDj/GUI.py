@@ -28,6 +28,7 @@ class MainWindow(QMainWindow):
     SONG_DISC_HEIGHT = 30
     ARTIST_DESC_X = 100
     ARTIST_DESC_Y = 75
+    SUMMARY_DESC_X = 25
 
     # Import Button Locs
     IMPORT_BTN_X = 100
@@ -61,16 +62,22 @@ class MainWindow(QMainWindow):
     MFCC_GRAPH_Y = 505
     MFCC_GRAPH_BG_Y = 450
 
+    inputDetected = False
+    bpm = 0
+    maxFreq = 0
+
     def __init__(self, parent=None):
         super().__init__()
         self.initUI()
 
     def initUI(self):
 
+        self.graphBackground(0, 0, self.WINDOW_WIDTH, self.WINDOW_HEIGHT, 'backwindow.jpg')
         self.setGeometry(self.WINDOW_X_LOC, self.WINDOW_Y_LOC, self.WINDOW_WIDTH, self.WINDOW_HEIGHT) #(x,y, width, height)
         self.setWindowTitle('PYDJ')
         self.setWindowIcon(QIcon(os.path.join("Assets", "icon.jpg")))
         self.createMenu()
+
         self.createButton(self.IMPORT_BTN_X, self.IMPORT_BTN_Y, self.IMPORT_BTN_WIDTH, self.IMPORT_BTN_HEIGHT, 'IMPORT')
         self.createArtistTextBox(self.SONG_DESC_X, self.SONG_DESC_Y, self.SONG_DESC_WIDTH, self.SONG_DISC_HEIGHT, "Artist")
         self.createSongTextBox(self.ARTIST_DESC_X, self.ARTIST_DESC_Y, self.SONG_DESC_WIDTH, self.SONG_DISC_HEIGHT, "Song Title")
@@ -80,6 +87,12 @@ class MainWindow(QMainWindow):
         self.graphBackground(self.PITCH_GRAPH_BG_X, self.PITCH_GRAPH_BG_Y, self.GRAPH_BG_WIDTH, self.GRAPH_BG_HEIGHT, 'bgf.jpg')
         self.graphBackground(self.BEAT_GRAPH_BG_X, self.BEAT_GRAPH_BG_Y, self.GRAPH_BG_WIDTH, self.GRAPH_BG_HEIGHT, 'bgf.jpg')
         self.graphBackground(self.MFCC_GRAPH_BG_X, self.MFCC_GRAPH_BG_Y, self.GRAPH_BG_WIDTH, self.GRAPH_BG_HEIGHT, 'bgf.jpg')
+        self.graphBackground(self.SUMMARY_DESC_X-15, self.IMPORT_BTN_Y+75, self.GRAPH_BG_WIDTH/2.6, 1.4*self.GRAPH_BG_HEIGHT, 'summarybg.jpg')
+
+        self.createSummary(self.SUMMARY_DESC_X, self.IMPORT_BTN_Y+75, "---  BREAKDOWN  ---")
+        self.createBPM(self.SUMMARY_DESC_X, self.IMPORT_BTN_Y+150, "BPM: " + str(self.bpm))
+        self.createFREQ(self.SUMMARY_DESC_X, self.IMPORT_BTN_Y+225, "Max Freq: " + str(self.maxFreq))
+
         self.show()
 
     def createMenu(self):
@@ -133,6 +146,20 @@ class MainWindow(QMainWindow):
         self.songLine.resize(width,height)
         self.songLabel.move(x-85,y)
         
+    def createSummary(self, x, y, text):
+        self.summaryLabel = QLabel(self)
+        self.summaryLabel.setText(text)
+        self.summaryLabel.move(x, y)
+
+    def createBPM(self, x, y, text):
+        self.bpmLabel = QLabel(self)
+        self.bpmLabel.setText(text)
+        self.bpmLabel.move(x, y)
+
+    def createFREQ(self, x, y, text):
+        self.freqLabel = QLabel(self)
+        self.freqLabel.setText(text)
+        self.freqLabel.move(x, y)
 
     def openFile(self):
         name = QFileDialog.getOpenFileName(self, 'Open File')
@@ -155,12 +182,8 @@ class MainWindow(QMainWindow):
 
 
     def getAudioMetrics(self, filename):
-
         y, sr = librosa.load(filename)
         tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
-        
-        global bpm
-        bpm = tempo 
 
         genre = ''
         genreDict = {
@@ -182,17 +205,19 @@ class MainWindow(QMainWindow):
         print()
         print(f'This falls under {genre} music')
 
+        
         self.displayFreqGraph(y, sr, self.FREQ_GRAPH_X, self.FREQ_GRAPH_Y)
         self.displayPitchGraph(y, sr, self.PITCH_GRAPH_X, self.PITCH_GRAPH_Y)
         self.displayBeatGraph(y, sr, self.BEAT_GRAPH_X, self.BEAT_GRAPH_Y)
         self.displayMFCCGraph(y, sr, self.MFCC_GRAPH_X, self.MFCC_GRAPH_Y)
+
+        self.bpmLabel.setText("BPM: " + str(tempo))
+        self.freqLabel.setText("Max Freq: " + str(self.maxFreq))
         
 
     def displayFreqGraph(self, arr, samplerate, x, y):
         librosa.display.waveplot(arr, sr=samplerate)
-
-        global maxFreq
-        maxFreq = arr.max()
+        self.maxFreq = arr.max()
         
         plt.title("Freq Detection")
         mngr = plt.get_current_fig_manager()
