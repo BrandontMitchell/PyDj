@@ -36,28 +36,47 @@ class MainWindow(QMainWindow):
     IMPORT_BTN_HEIGHT = 40
 
     # Graph Locs
-    FREQ_GRAPH_X = WINDOW_X_LOC + 300
-    FREQ_GRAPH_BG_X = WINDOW_X_LOC + 290
-    FREQ_GRAPH_Y = WINDOW_Y_LOC + 100
-    FREQ_GRAPH_BG_Y = WINDOW_Y_LOC + 90
-    FREQ_GRAPH_BG_WIDTH = 150
-    FREQ_GRAPH_BG_HIEGHT = 100
+    GRAPH_BG_WIDTH = 700
+    GRAPH_BG_HEIGHT = 400
 
+    FREQ_GRAPH_X = 320
+    FREQ_GRAPH_BG_X = 290
+    FREQ_GRAPH_Y = 85
+    FREQ_GRAPH_BG_Y = 30
+    
+    PITCH_GRAPH_X = 1030
+    PITCH_GRAPH_BG_X = 1000
+    PITCH_GRAPH_Y = 85
+    PITCH_GRAPH_BG_Y = 30 
+
+    BEAT_GRAPH_X = 320
+    BEAT_GRAPH_BG_X = 290
+    BEAT_GRAPH_Y = 495
+    BEAT_GRAPH_BG_Y = 440
+
+    MFCC_GRAPH_X = 
+    MFCC_GRAPH_BG_X =
+    MFCC_GRAPH_Y =
+    MFCC_GRAPH_BG_Y = 
 
     def __init__(self, parent=None):
         super().__init__()
         self.initUI()
-
 
     def initUI(self):
 
         self.setGeometry(self.WINDOW_X_LOC, self.WINDOW_Y_LOC, self.WINDOW_WIDTH, self.WINDOW_HEIGHT) #(x,y, width, height)
         self.setWindowTitle('PYDJ')
         self.setWindowIcon(QIcon(os.path.join("Assets", "icon.jpg")))
-        self.createButton(self.IMPORT_BTN_X, self.IMPORT_BTN_Y, self.IMPORT_BTN_WIDTH, self.IMPORT_BTN_HEIGHT, 'IMPORT')
         self.createMenu()
+        self.createButton(self.IMPORT_BTN_X, self.IMPORT_BTN_Y, self.IMPORT_BTN_WIDTH, self.IMPORT_BTN_HEIGHT, 'IMPORT')
         self.createArtistTextBox(self.SONG_DESC_X, self.SONG_DESC_Y, self.SONG_DESC_WIDTH, self.SONG_DISC_HEIGHT, "Artist")
         self.createSongTextBox(self.ARTIST_DESC_X, self.ARTIST_DESC_Y, self.SONG_DESC_WIDTH, self.SONG_DISC_HEIGHT, "Song Title")
+        
+        self.graphBackground(self.FREQ_GRAPH_BG_X, self.FREQ_GRAPH_BG_Y, 'bgf.jpg')
+        self.graphBackground(self.PITCH_GRAPH_BG_X, self.PITCH_GRAPH_BG_Y, 'bgf.jpg')
+        self.graphBackground(self.BEAT_GRAPH_BG_X, self.BEAT_GRAPH_BG_Y, 'bgf.jpg')
+        self.graphBackground(self.PITCH_GRAPH_BG_X, self.PITCH_GRAPH_BG_Y, 'bgf.jpg')
         self.show()
 
     def createMenu(self):
@@ -117,8 +136,11 @@ class MainWindow(QMainWindow):
         self.getAudioMetrics(name[0])
 
 
-
-
+    def graphBackground(self, x, y, image):
+        self.label = QLabel(self)
+        self.label.setPixmap(QPixmap(os.path.join("Assets", image)))
+        self.label.setGeometry(x, y, self.GRAPH_BG_WIDTH, self.GRAPH_BG_HEIGHT)
+        
 
 ##################      ANALYSIS     ##################
     
@@ -158,7 +180,7 @@ class MainWindow(QMainWindow):
     def displayAudioMetrics(self, arr, int, x, y):
         librosa.display.waveplot(arr, sr=int)
         mngr = plt.get_current_fig_manager()
-        mngr.window.setGeometry(x, y, 200, 200)
+        mngr.window.setGeometry(x+self.WINDOW_X_LOC, y + self.WINDOW_Y_LOC, 645, 335)
         plt.show()
         
 
