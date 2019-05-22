@@ -166,7 +166,7 @@ class MainWindow(QMainWindow):
             'Dubstep': range(140, 160),
             'Hardcore': range(160, 300)
         }
-
+        print("Beats frames" + str(beat_frames))
         # loops through genre dictionary to match bpm from input file
         # to a specific genre, helpful when mixing
         for key, value in genreDict.items():
@@ -176,16 +176,20 @@ class MainWindow(QMainWindow):
         print('Estimated temp: {:.2f} beats per minute'.format(tempo))
         print()
         print(f'This falls under {genre} music')
+
         self.displayFreqGraph(y, sr, self.FREQ_GRAPH_X, self.FREQ_GRAPH_Y)
         self.displayPitchGraph(y, sr, self.PITCH_GRAPH_X, self.PITCH_GRAPH_Y)
         self.displayBeatGraph(y, sr, self.BEAT_GRAPH_X, self.BEAT_GRAPH_Y)
-        # self.displayMFCCGraph()
+        self.displayMFCCGraph(y, sr, self.MFCC_GRAPH_X, self.MFCC_GRAPH_Y)
+        
 
-    def displayFreqGraph(self, arr, int, x, y):
-        librosa.display.waveplot(arr, sr=int)
+    def displayFreqGraph(self, arr, samplerate, x, y):
+        librosa.display.waveplot(arr, sr=samplerate)
 
+        global maxFreq
+        maxFreq = arr.max()
+        
         plt.title("Freq Detection")
-
         mngr = plt.get_current_fig_manager()
         mngr.window.setGeometry(x+self.WINDOW_X_LOC, y + self.WINDOW_Y_LOC, self.GRAPH_WIDTH, self.GRAPH_HEIGHT)
         plt.tight_layout()
@@ -195,7 +199,7 @@ class MainWindow(QMainWindow):
         y_harmonic, y_percussive = librosa.effects.hpss(arr)
         C = librosa.feature.chroma_cqt(y=y_harmonic, sr=int)
         
-        plt.figure(figsize=(12,4))
+        plt.figure(figsize=(12,4), num="Pitch Graph")
         librosa.display.specshow(C, sr=int, x_axis='time', y_axis='chroma', vmin=0, vmax=1)
         
         plt.title("Pitch Detection - Chromagram")
@@ -211,7 +215,7 @@ class MainWindow(QMainWindow):
         S = librosa.feature.melspectrogram(arr, sr=int, n_mels=128)
         log_S = librosa.power_to_db(S, ref=np.max)
 
-        plt.figure(figsize=(12,4))
+        plt.figure(figsize=(12,4), num="Beat Graph")
         tempo, beats = librosa.beat.beat_track(y=y_percussive, sr=int)
         librosa.display.specshow(log_S, sr=int, x_axis='time', y_axis='mel')
 
@@ -227,12 +231,27 @@ class MainWindow(QMainWindow):
         plt.show()
 
 
+    def displayMFCCGraph(self, arr, int, x, y):
+        S = librosa.feature.melspectrogram(arr, sr=int, n_mels=128)
+        log_S = librosa.power_to_db(S, ref=np.max)
+        mfcc = librosa.feature.mfcc(S=log_S, n_mfcc=13)
 
-    def displayMFCCGraph(self):
+        plt.figure(figsize=(12,4), num="MFCC Graph")
+        librosa.display.specshow(mfcc)
+        plt.ylabel('MFCC')
+        plt.colorbar()
+        print(maxFreq)
+        mngr = plt.get_current_fig_manager()
+        mngr.window.setGeometry(x+self.WINDOW_X_LOC, y + self.WINDOW_Y_LOC, self.GRAPH_WIDTH, self.GRAPH_HEIGHT)
+        plt.tight_layout()
+        plt.show()
+
+    def getMetrics(self):
         pass
 
 
-
+    def visualMetrics(self):
+        pass
 
     def newCall(self):
         print("New")
