@@ -7,15 +7,10 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 from matplotlib.figure import Figure 
 from urllib.request import urlopen
 from urllib.parse import quote
+from playsound import playsound
 import matplotlib.pyplot as plt 
 import numpy as np
-import requests
-import random 
-import librosa
-import librosa.display
-import time
-import sys
-import os
+import requests, random, librosa, librosa.display, time, os, sys
 
 class MainWindow(QMainWindow):
 
@@ -98,6 +93,7 @@ class MainWindow(QMainWindow):
         self.createSummary(self.SUMMARY_DESC_X, self.IMPORT_BTN_Y+75, "---  BREAKDOWN  ---")
         self.createBPM(self.SUMMARY_DESC_X, self.IMPORT_BTN_Y+150, "BPM: " + str(self.bpm))
         self.createFREQ(self.SUMMARY_DESC_X, self.IMPORT_BTN_Y+225, "Max Freq: " + str(self.maxFreq))
+        self.suggestSongs(self.PITCH_GRAPH_BG_X, self.MFCC_GRAPH_BG_Y+self.GRAPH_BG_HEIGHT+20, "This is a test")
 
     def createMenu(self):
         new_icon = os.path.join("Assets", "new.png") 
@@ -168,10 +164,17 @@ class MainWindow(QMainWindow):
         self.freqLabel.setText(text)
         self.freqLabel.move(x, y)
 
+    def suggestSongs(self, x, y, text):
+        self.newSongs = QLabel(text, self)
+        self.newSongs.move(x, y)
+
     def openFile(self):
         name = QFileDialog.getOpenFileName(self, 'Open File')
         self.getAudioMetrics(name[0])
+        self.playFile(name[0])
 
+    def playFile(self, file):
+        playsound(file)
 
     def graphBackground(self, x, y, width, height, image):
         self.label = QLabel(self)
