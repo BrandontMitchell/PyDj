@@ -5,11 +5,15 @@ from PyQt5.QtCore import *
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure 
+from urllib.request import urlopen
+from urllib.parse import quote
 import matplotlib.pyplot as plt 
 import numpy as np
+import requests
 import random 
 import librosa
 import librosa.display
+import time
 import sys
 import os
 
@@ -65,6 +69,8 @@ class MainWindow(QMainWindow):
     inputDetected = False
     bpm = 0
     maxFreq = 0
+    artist = ''
+    song = ''
 
     def __init__(self, parent=None):
         super().__init__()
@@ -92,8 +98,6 @@ class MainWindow(QMainWindow):
         self.createSummary(self.SUMMARY_DESC_X, self.IMPORT_BTN_Y+75, "---  BREAKDOWN  ---")
         self.createBPM(self.SUMMARY_DESC_X, self.IMPORT_BTN_Y+150, "BPM: " + str(self.bpm))
         self.createFREQ(self.SUMMARY_DESC_X, self.IMPORT_BTN_Y+225, "Max Freq: " + str(self.maxFreq))
-
-        self.show()
 
     def createMenu(self):
         new_icon = os.path.join("Assets", "new.png") 
@@ -147,11 +151,14 @@ class MainWindow(QMainWindow):
         self.songLabel.move(x-85,y)
         
     def createSummary(self, x, y, text):
-        self.summaryLabel = QLabel(self)
-        self.summaryLabel.setText(text)
+        font = QFont()
+        font.setPointSize(15)
+        self.summaryLabel = QLabel(text,self)
+        self.summaryLabel.setFont(font)
         self.summaryLabel.move(x, y)
 
     def createBPM(self, x, y, text):
+
         self.bpmLabel = QLabel(self)
         self.bpmLabel.setText(text)
         self.bpmLabel.move(x, y)
@@ -172,13 +179,27 @@ class MainWindow(QMainWindow):
         self.label.setGeometry(x, y, width, height)
         
 
+
+    # def apiCall(self):
+    #     client_access_token = ''
+    #     search_artist = self.artist 
+    #     _URL_API = "https://api.genius.com/"
+    #     _URL_SEARCH = "search?q="
+    #     querystring = _URL_API + _URL_SEARCH + quote(search_artist)
+    #     request = urlopen(querystring)
+    #     request.add_header("Authorization", "Bearer" + client_access_token)
+    #     request.add_header("User-Agent", "")
+
+    #     response = urlopen(request, timeout=3)
+    #     json_obj = response.json()
+    #     print(json_obj['response']['hits'][0]['result'].keys())
+
+
 ##################      ANALYSIS     ##################
     
     def getTitle(self):
-        artist = self.artistLine.text()
-        song = self.songLine.text()
-        print(f'Artist: {artist}')
-        print(f'Song: {song}')
+        self.artist = self.artistLine.text()
+        self.song = self.songLine.text()
 
 
     def getAudioMetrics(self, filename):
@@ -205,19 +226,16 @@ class MainWindow(QMainWindow):
         print()
         print(f'This falls under {genre} music')
 
-        
+        self.bpmLabel.setText("BPM: " + str(tempo))
         self.displayFreqGraph(y, sr, self.FREQ_GRAPH_X, self.FREQ_GRAPH_Y)
         self.displayPitchGraph(y, sr, self.PITCH_GRAPH_X, self.PITCH_GRAPH_Y)
         self.displayBeatGraph(y, sr, self.BEAT_GRAPH_X, self.BEAT_GRAPH_Y)
-        self.displayMFCCGraph(y, sr, self.MFCC_GRAPH_X, self.MFCC_GRAPH_Y)
-
-        self.bpmLabel.setText("BPM: " + str(tempo))
-        self.freqLabel.setText("Max Freq: " + str(self.maxFreq))
-        
+        self.displayMFCCGraph(y, sr, self.MFCC_GRAPH_X, self.MFCC_GRAPH_Y)        
 
     def displayFreqGraph(self, arr, samplerate, x, y):
         librosa.display.waveplot(arr, sr=samplerate)
         self.maxFreq = arr.max()
+        self.freqLabel.setText("Max Freq: " + str(self.maxFreq))
         
         plt.title("Freq Detection")
         mngr = plt.get_current_fig_manager()
@@ -274,10 +292,6 @@ class MainWindow(QMainWindow):
         mngr.window.setGeometry(x+self.WINDOW_X_LOC, y + self.WINDOW_Y_LOC, self.GRAPH_WIDTH, self.GRAPH_HEIGHT)
         plt.tight_layout()
         plt.show()
-
-    def getMetrics(self):
-        pass
-
 
     def visualizeMetrics(self):
         pass
