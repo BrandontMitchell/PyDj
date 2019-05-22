@@ -41,25 +41,25 @@ class MainWindow(QMainWindow):
     GRAPH_WIDTH = 645
     GRAPH_HEIGHT = 335
 
-    FREQ_GRAPH_X = 320
-    FREQ_GRAPH_BG_X = 290
-    FREQ_GRAPH_Y = 85
-    FREQ_GRAPH_BG_Y = 30
+    FREQ_GRAPH_X = 330
+    FREQ_GRAPH_BG_X = 300
+    FREQ_GRAPH_Y = 95
+    FREQ_GRAPH_BG_Y = 40
     
-    PITCH_GRAPH_X = 1030
-    PITCH_GRAPH_BG_X = 1000
-    PITCH_GRAPH_Y = 85
-    PITCH_GRAPH_BG_Y = 30 
+    PITCH_GRAPH_X = 1040
+    PITCH_GRAPH_BG_X = 1010
+    PITCH_GRAPH_Y = 95
+    PITCH_GRAPH_BG_Y = 40 
 
-    BEAT_GRAPH_X = 320
-    BEAT_GRAPH_BG_X = 290
-    BEAT_GRAPH_Y = 495
-    BEAT_GRAPH_BG_Y = 440
+    BEAT_GRAPH_X = 330
+    BEAT_GRAPH_BG_X = 300
+    BEAT_GRAPH_Y = 505
+    BEAT_GRAPH_BG_Y = 450
 
-    MFCC_GRAPH_X = 1030
-    MFCC_GRAPH_BG_X = 1000
-    MFCC_GRAPH_Y = 495
-    MFCC_GRAPH_BG_Y = 440
+    MFCC_GRAPH_X = 1040
+    MFCC_GRAPH_BG_X = 1010
+    MFCC_GRAPH_Y = 505
+    MFCC_GRAPH_BG_Y = 450
 
     def __init__(self, parent=None):
         super().__init__()
@@ -75,10 +75,11 @@ class MainWindow(QMainWindow):
         self.createArtistTextBox(self.SONG_DESC_X, self.SONG_DESC_Y, self.SONG_DESC_WIDTH, self.SONG_DISC_HEIGHT, "Artist")
         self.createSongTextBox(self.ARTIST_DESC_X, self.ARTIST_DESC_Y, self.SONG_DESC_WIDTH, self.SONG_DISC_HEIGHT, "Song Title")
         
-        self.graphBackground(self.FREQ_GRAPH_BG_X, self.FREQ_GRAPH_BG_Y, 'bgf.jpg')
-        self.graphBackground(self.PITCH_GRAPH_BG_X, self.PITCH_GRAPH_BG_Y, 'bgf.jpg')
-        self.graphBackground(self.BEAT_GRAPH_BG_X, self.BEAT_GRAPH_BG_Y, 'bgf.jpg')
-        self.graphBackground(self.MFCC_GRAPH_BG_X, self.MFCC_GRAPH_BG_Y, 'bgf.jpg')
+        self.graphBackground(self.FREQ_GRAPH_BG_X-10, self.FREQ_GRAPH_BG_Y-10, 2.04*self.GRAPH_BG_WIDTH, 2.08*self.GRAPH_BG_HEIGHT, 'backbg.png')
+        self.graphBackground(self.FREQ_GRAPH_BG_X, self.FREQ_GRAPH_BG_Y, self.GRAPH_BG_WIDTH, self.GRAPH_BG_HEIGHT, 'bgf.jpg')
+        self.graphBackground(self.PITCH_GRAPH_BG_X, self.PITCH_GRAPH_BG_Y, self.GRAPH_BG_WIDTH, self.GRAPH_BG_HEIGHT, 'bgf.jpg')
+        self.graphBackground(self.BEAT_GRAPH_BG_X, self.BEAT_GRAPH_BG_Y, self.GRAPH_BG_WIDTH, self.GRAPH_BG_HEIGHT, 'bgf.jpg')
+        self.graphBackground(self.MFCC_GRAPH_BG_X, self.MFCC_GRAPH_BG_Y, self.GRAPH_BG_WIDTH, self.GRAPH_BG_HEIGHT, 'bgf.jpg')
         self.show()
 
     def createMenu(self):
@@ -138,10 +139,10 @@ class MainWindow(QMainWindow):
         self.getAudioMetrics(name[0])
 
 
-    def graphBackground(self, x, y, image):
+    def graphBackground(self, x, y, width, height, image):
         self.label = QLabel(self)
         self.label.setPixmap(QPixmap(os.path.join("Assets", image)))
-        self.label.setGeometry(x, y, self.GRAPH_BG_WIDTH, self.GRAPH_BG_HEIGHT)
+        self.label.setGeometry(x, y, width, height)
         
 
 ##################      ANALYSIS     ##################
@@ -157,6 +158,10 @@ class MainWindow(QMainWindow):
 
         y, sr = librosa.load(filename)
         tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
+        
+        global bpm
+        bpm = tempo 
+
         genre = ''
         genreDict = {
             'R&B/Slow': range(0,65),
@@ -198,7 +203,7 @@ class MainWindow(QMainWindow):
     def displayPitchGraph(self, arr, int, x, y):
         y_harmonic, y_percussive = librosa.effects.hpss(arr)
         C = librosa.feature.chroma_cqt(y=y_harmonic, sr=int)
-        
+
         plt.figure(figsize=(12,4), num="Pitch Graph")
         librosa.display.specshow(C, sr=int, x_axis='time', y_axis='chroma', vmin=0, vmax=1)
         
@@ -217,11 +222,11 @@ class MainWindow(QMainWindow):
 
         plt.figure(figsize=(12,4), num="Beat Graph")
         tempo, beats = librosa.beat.beat_track(y=y_percussive, sr=int)
-        librosa.display.specshow(log_S, sr=int, x_axis='time', y_axis='mel')
+        librosa.display.specshow(log_S, sr=int, x_axis='time', y_axis='mel', alpha=0.8)
 
         plt.vlines(librosa.frames_to_time(beats),
                     1, 0.5*int,
-                    colors='w', linestyles='-', linewidth=2, alpha=0.5)
+                    colors='r', linestyles='-', linewidth=5, alpha=0.5)
         plt.axis('tight')
         plt.colorbar(format='%+02.0f dB')
 
@@ -240,7 +245,6 @@ class MainWindow(QMainWindow):
         librosa.display.specshow(mfcc)
         plt.ylabel('MFCC')
         plt.colorbar()
-        print(maxFreq)
         mngr = plt.get_current_fig_manager()
         mngr.window.setGeometry(x+self.WINDOW_X_LOC, y + self.WINDOW_Y_LOC, self.GRAPH_WIDTH, self.GRAPH_HEIGHT)
         plt.tight_layout()
@@ -250,7 +254,7 @@ class MainWindow(QMainWindow):
         pass
 
 
-    def visualMetrics(self):
+    def visualizeMetrics(self):
         pass
 
     def newCall(self):
