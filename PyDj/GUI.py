@@ -11,7 +11,7 @@ import ssl, json
 from playsound import playsound
 import matplotlib.pyplot as plt 
 import numpy as np
-import requests, random, librosa, librosa.display, time, os, sys
+import requests, random, librosa, librosa.display, time, os, sys, urllib
 
 class MainWindow(QMainWindow):
 
@@ -210,6 +210,14 @@ class MainWindow(QMainWindow):
             hs.write(image_src + '\n')
             hs.close()
 
+        with open(hashtag + '.txt') as f:
+            self.content = f.readlines()
+        image = self.content[0]
+        print(image)
+        urllib.request.urlretrieve((image), hashtag+".jpg")
+
+        # f.write(urllib.request.urlretrieve(image), hashtag+".jpg")
+        # f.close()
 
         # data = soup.find_all('meta', attrs={'property': 'og:description'})
         # text = data[0].get('content').split()
