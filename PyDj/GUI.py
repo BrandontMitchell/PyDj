@@ -62,8 +62,6 @@ class MainWindow(QMainWindow):
     MFCC_GRAPH_BG_Y = 450
 
     inputDetected = False
-    bpm = 0
-    maxFreq = 0
     artist = ''
     song = ''
 
@@ -90,10 +88,10 @@ class MainWindow(QMainWindow):
         self.graphBackground(self.MFCC_GRAPH_BG_X, self.MFCC_GRAPH_BG_Y, self.GRAPH_BG_WIDTH, self.GRAPH_BG_HEIGHT, 'bgf.jpg')
         self.graphBackground(self.SUMMARY_DESC_X-15, self.IMPORT_BTN_Y+75, self.GRAPH_BG_WIDTH/2.6, 1.4*self.GRAPH_BG_HEIGHT, 'summarybg.jpg')
 
-        self.createSummary(self.SUMMARY_DESC_X, self.IMPORT_BTN_Y+75, "---  BREAKDOWN  ---")
-        self.createBPM(self.SUMMARY_DESC_X, self.IMPORT_BTN_Y+150, "BPM: " + str(self.bpm))
-        self.createFREQ(self.SUMMARY_DESC_X, self.IMPORT_BTN_Y+225, "Max Freq: " + str(self.maxFreq))
-        self.suggestSongs(self.PITCH_GRAPH_BG_X, self.MFCC_GRAPH_BG_Y+self.GRAPH_BG_HEIGHT+20, "This is a test")
+        self.createSummary(self.SUMMARY_DESC_X+30, self.IMPORT_BTN_Y+75, "---  BREAKDOWN  ---")
+        self.createBPM(self.SUMMARY_DESC_X, self.IMPORT_BTN_Y+150, "BPM: ")
+        self.createFREQ(self.SUMMARY_DESC_X, self.IMPORT_BTN_Y+200, "Max Freq: ")
+        self.trackSpecs(self.SUMMARY_DESC_X, self.IMPORT_BTN_Y+250)
 
     def createMenu(self):
         new_icon = os.path.join("Assets", "new.png") 
@@ -147,22 +145,35 @@ class MainWindow(QMainWindow):
         self.songLabel.move(x-85,y)
         
     def createSummary(self, x, y, text):
-        font = QFont()
-        font.setPointSize(15)
         self.summaryLabel = QLabel(text,self)
-        self.summaryLabel.setFont(font)
+        self.summaryLabel.resize(1000, 20)
         self.summaryLabel.move(x, y)
 
     def createBPM(self, x, y, text):
-
-        self.bpmLabel = QLabel(self)
-        self.bpmLabel.setText(text)
+        self.bpmLabel = QLabel(text, self)
+        self.bpmLabel.resize(1000,20)
         self.bpmLabel.move(x, y)
 
     def createFREQ(self, x, y, text):
-        self.freqLabel = QLabel(self)
-        self.freqLabel.setText(text)
+        self.freqLabel = QLabel(text, self)
+        self.freqLabel.resize(1000, 20)
         self.freqLabel.move(x, y)
+    
+    def trackSpecs(self, x, y):
+        self.trackLabel = QLabel("Track Name: ", self)
+        self.artistLabel = QLabel("Artist: ", self)
+        self.albumLabel = QLabel("Album: ", self)
+        self.genreLabel = QLabel("Genre: ", self)
+
+        self.trackLabel.resize(1000, 20)
+        self.trackLabel.move(x, y)
+        self.artistLabel.resize(1000, 20)
+        self.artistLabel.move(x, y+50)
+        self.albumLabel.resize(1000, 20)
+        self.albumLabel.move(x, y+100)
+        self.genreLabel.resize(1000, 20)
+        self.genreLabel.move(x, y+150)
+        
 
     def suggestSongs(self, x, y, text):
         self.newSongs = QLabel(text, self)
@@ -229,7 +240,7 @@ class MainWindow(QMainWindow):
         print()
         print(f'This falls under {genre} music')
 
-        self.bpmLabel.setText("BPM: " + str(tempo))
+        self.bpmLabel.setText("BPM: " + str(int(tempo)))
         self.displayFreqGraph(y, sr, self.FREQ_GRAPH_X, self.FREQ_GRAPH_Y)
         self.displayPitchGraph(y, sr, self.PITCH_GRAPH_X, self.PITCH_GRAPH_Y)
         self.displayBeatGraph(y, sr, self.BEAT_GRAPH_X, self.BEAT_GRAPH_Y)
