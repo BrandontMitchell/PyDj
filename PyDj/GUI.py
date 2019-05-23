@@ -192,15 +192,11 @@ class MainWindow(QMainWindow):
         self.label = QLabel(self)
         self.label.setPixmap(QPixmap(os.path.join("Assets", image)))
         self.label.setGeometry(x, y, width, height)
-        
-
 
     def getInfo(self, hashtag, url):
         html = urllib.request.urlopen(url, context=self.ctx).read()
         soup = bs(html, 'html.parser')
-        
-        script = soup.find('script', text=lambda t: \
-                                t.startswith('window._sharedData'))
+        script = soup.find('script', text=lambda t: t.startswith('window._sharedData'))
         
         page_json = script.text.split(' = ', 1)[1].rstrip(';')
         data = json.loads(page_json)
@@ -212,23 +208,16 @@ class MainWindow(QMainWindow):
 
         with open(hashtag + '.txt') as f:
             self.content = f.readlines()
-        image = self.content[0]
-        print(image)
-        urllib.request.urlretrieve((image), hashtag+".jpg")
 
-        # f.write(urllib.request.urlretrieve(image), hashtag+".jpg")
-        # f.close()
+        image = self.content[random.randint(0, len(self.content)-1)]
+        filename = os.path.join("Assets", hashtag+".jpg")
+        urllib.request.urlretrieve((image), filename)
+        self.importPicture(20, 700, image)
 
-        # data = soup.find_all('meta', attrs={'property': 'og:description'})
-        # text = data[0].get('content').split()
-        # user = '%s %s %s' % (text[-3], text[-2], text[-1])
-        # followers = text[0]
-        # following = text[2]
-        # print(text[0:])
-        # print(f'User: {user}')
-        # print(f'Followers: {followers}')
-        # print(f'Following: {following}')
-        
+    def importPicture(self, x, y, image):
+        self.artistPic = QLabel(self)
+        self.artistPic.setPixmap(QPixmap(os.path.join(image)))
+        self.artistPic.setGeometry(x, y, 240, 240)
 
 
 ##################      ANALYSIS     ##################
