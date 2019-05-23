@@ -5,8 +5,9 @@ from PyQt5.QtCore import *
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure 
-from urllib.request import urlopen
-from urllib.parse import quote
+import urllib.request, urllib.parse, urllib.error
+from bs4 import BeautifulSoup as bs 
+import ssl, json 
 from playsound import playsound
 import matplotlib.pyplot as plt 
 import numpy as np
@@ -194,19 +195,32 @@ class MainWindow(QMainWindow):
         
 
 
-    # def apiCall(self):
-    #     client_access_token = ''
-    #     search_artist = self.artist 
-    #     _URL_API = "https://api.genius.com/"
-    #     _URL_SEARCH = "search?q="
-    #     querystring = _URL_API + _URL_SEARCH + quote(search_artist)
-    #     request = urlopen(querystring)
-    #     request.add_header("Authorization", "Bearer" + client_access_token)
-    #     request.add_header("User-Agent", "")
+    def getInfo(self, hashtag, url):
+        html = urllib.request.urlopen(url, context=self.ctx).read()
+        soup = bs(html, 'html.parser')
+        
+        script = soup.find('script', text=lambda t: \
+                                t.startswith('window._sharedData'))
+        
+        page_json = script.text.split(' = ', 1)[1].rstrip(';')
+        data = json.loads(page_json)
+        for post in data['entry_data']['TagPage'][0]['graphql']['hashtag']['edge_hashtag_to_media']['edges']:
+            image_src = post['node']['thumbnail_resources'][1]['src']
+            hs = open(hashtag + '.txt', 'a')
+            hs.write(image_src + '\n')
+            hs.close()
 
-    #     response = urlopen(request, timeout=3)
-    #     json_obj = response.json()
-    #     print(json_obj['response']['hits'][0]['result'].keys())
+
+        # data = soup.find_all('meta', attrs={'property': 'og:description'})
+        # text = data[0].get('content').split()
+        # user = '%s %s %s' % (text[-3], text[-2], text[-1])
+        # followers = text[0]
+        # following = text[2]
+        # print(text[0:])
+        # print(f'User: {user}')
+        # print(f'Followers: {followers}')
+        # print(f'Following: {following}')
+        
 
 
 ##################      ANALYSIS     ##################
@@ -214,6 +228,12 @@ class MainWindow(QMainWindow):
     def getTitle(self):
         self.artist = self.artistLine.text()
         self.song = self.songLine.text()
+
+        self.ctx = ssl.create_default_context()
+        self.ctx.check_hostname = False 
+        self.ctx.verify_mode = ssl.CERT_NONE
+        url = 'https://www.instagram.com/explore/tags/' + self.artist.strip()
+        self.getInfo(self.artist.strip(), url)
 
 
     def getAudioMetrics(self, filename):
