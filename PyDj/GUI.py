@@ -62,7 +62,7 @@ class MainWindow(QMainWindow):
     MFCC_GRAPH_Y = 505
     MFCC_GRAPH_BG_Y = 450
 
-    inputDetected = False
+    musicLoaded = False
     artist = ''
     song = ''
 
@@ -88,11 +88,13 @@ class MainWindow(QMainWindow):
         self.graphBackground(self.BEAT_GRAPH_BG_X, self.BEAT_GRAPH_BG_Y, self.GRAPH_BG_WIDTH, self.GRAPH_BG_HEIGHT, 'bgf.jpg')
         self.graphBackground(self.MFCC_GRAPH_BG_X, self.MFCC_GRAPH_BG_Y, self.GRAPH_BG_WIDTH, self.GRAPH_BG_HEIGHT, 'bgf.jpg')
         self.graphBackground(self.SUMMARY_DESC_X-15, self.IMPORT_BTN_Y+75, self.GRAPH_BG_WIDTH/2.6, 1.4*self.GRAPH_BG_HEIGHT, 'summarybg.jpg')
+        self.graphBackground(self.SUMMARY_DESC_X+25, self.IMPORT_BTN_Y+665, 160, 95, 'summarybg.jpg')
 
         self.createSummary(self.SUMMARY_DESC_X+30, self.IMPORT_BTN_Y+75, "---  BREAKDOWN  ---")
         self.createBPM(self.SUMMARY_DESC_X, self.IMPORT_BTN_Y+150, "BPM: ")
         self.createFREQ(self.SUMMARY_DESC_X, self.IMPORT_BTN_Y+200, "Max Freq: ")
         self.trackSpecs(self.SUMMARY_DESC_X, self.IMPORT_BTN_Y+250)
+        
 
     def createMenu(self):
         new_icon = os.path.join("Assets", "new.png") 
@@ -126,6 +128,7 @@ class MainWindow(QMainWindow):
         button.clicked.connect(self.openFile)
         button.resize(width, height)
         button.move(x,y)
+        
 
     def createArtistTextBox(self, x, y, width, height, title):
         self.nameLabel = QLabel(self)
@@ -164,7 +167,7 @@ class MainWindow(QMainWindow):
         self.trackLabel = QLabel("Track Name: ", self)
         self.artistLabel = QLabel("Artist: ", self)
         self.genreLabel = QLabel("Genre: ", self)
-
+        
         self.trackLabel.resize(1000, 20)
         self.trackLabel.move(x, y)
         self.artistLabel.resize(1000, 20)
@@ -180,7 +183,7 @@ class MainWindow(QMainWindow):
     def openFile(self):
         name = QFileDialog.getOpenFileName(self, 'Open File')
         self.getAudioMetrics(name[0])
-        self.playFile(name[0])
+        self.playButton(self.SUMMARY_DESC_X+30, self.IMPORT_BTN_Y+670, 150, 85, name[0])
 
     def playFile(self, file):
         playsound(file)
@@ -199,25 +202,32 @@ class MainWindow(QMainWindow):
         data = json.loads(page_json)
         for post in data['entry_data']['TagPage'][0]['graphql']['hashtag']['edge_hashtag_to_media']['edges']:
             image_src = post['node']['thumbnail_resources'][1]['src']
-            hs = open(hashtag + '.txt', 'a')
+            hs = open(os.path.join("Assets\ArtistTextFiles", hashtag + '.txt'), 'a')
             hs.write(image_src + '\n')
             hs.close()
 
-        with open(hashtag + '.txt') as f:
+        with open(os.path.join("Assets\ArtistTextFiles", hashtag + '.txt')) as f:
             self.content = f.readlines()
 
         image = self.content[random.randint(0, len(self.content)-1)]
         filename = os.path.join("Assets\ArtistsImages", hashtag+".jpg")
         urllib.request.urlretrieve((image), filename)
-        self.importPicture(20, 610, filename)
+        self.importPicture(20, 610, 240, 240, filename)
 
-    def importPicture(self, x, y, image):
+    def importPicture(self, x, y, width, height, image):
         self.artistPic = QLabel(self)
         self.artistPic.setPixmap(QPixmap(image))
-        print(image)
-        self.artistPic.setGeometry(x, y, 240, 240)
+        self.artistPic.setGeometry(x, y, width, height)
         self.artistPic.show()
 
+    def playButton(self, x, y, width, height, filename):
+        self.playbtn = QPushButton(self)
+        self.playIcon = QIcon(os.path.join("Assets", "playbtn_blank.png"))
+        self.playbtn.setIcon(self.playIcon)
+        self.playbtn.setGeometry(x, y, width, height)
+        self.playbtn.show()
+        time.sleep(3)
+        self.playbtn.clicked.connect(lambda: self.playFile(filename))
 
 ##################      ANALYSIS     ##################
     
@@ -225,14 +235,14 @@ class MainWindow(QMainWindow):
         self.artist = self.artistLine.text()
         self.song = self.songLine.text()
         self.artistLabel.setText("Artist: " + self.artist)
-        self.songLabel.setText("Track Name: " + self.song)
+        self.trackLabel.setText("Track Name: " + self.song)
 
         self.ctx = ssl.create_default_context()
         self.ctx.check_hostname = False 
         self.ctx.verify_mode = ssl.CERT_NONE
-        
-        url = 'https://www.instagram.com/explore/tags/' + self.artist.strip()
-        self.getInfo(self.artist.strip(), url)
+
+        url = 'https://www.instagram.com/explore/tags/' + self.artist.replace(" ", "")
+        self.getInfo(self.artist.replace(" ", ""), url)
 
 
     def getAudioMetrics(self, filename):
