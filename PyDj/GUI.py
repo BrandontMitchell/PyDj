@@ -1,17 +1,17 @@
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QFileDialog, QVBoxLayout, QPushButton, QAction, QSizePolicy, QLineEdit, QLabel
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QFileDialog, QVBoxLayout, QPushButton, QAction, QSizePolicy, QLineEdit, QLabel
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+import requests, random, librosa, librosa.display, time, os, sys, urllib, ssl, json
 from matplotlib.figure import Figure 
 import urllib.request, urllib.parse, urllib.error
 from bs4 import BeautifulSoup as bs 
-import ssl, json 
 from playsound import playsound
 import matplotlib.pyplot as plt 
 import numpy as np
-import requests, random, librosa, librosa.display, time, os, sys, urllib
+
 
 class MainWindow(QMainWindow):
 
@@ -62,7 +62,15 @@ class MainWindow(QMainWindow):
     MFCC_GRAPH_Y = 505
     MFCC_GRAPH_BG_Y = 450
 
-    musicLoaded = False
+    SUMMARY_BG_X = SUMMARY_DESC_X+30
+    SUMMARY_BG_Y = IMPORT_BTN_Y+75
+    SUMMARY_BG_WIDTH = GRAPH_BG_WIDTH/2.6
+    SUMMARY_BG_HEIGHT = GRAPH_BG_HEIGHT*1.4
+
+    PLAY_BG_X = SUMMARY_DESC_X+25
+    PLAY_BG_Y = IMPORT_BTN_Y+665
+    PLAY_BG_WIDTH = 160
+    PLAY_BG_HEIGHT = 95     
     artist = ''
     song = ''
 
@@ -87,13 +95,13 @@ class MainWindow(QMainWindow):
         self.graphBackground(self.PITCH_GRAPH_BG_X, self.PITCH_GRAPH_BG_Y, self.GRAPH_BG_WIDTH, self.GRAPH_BG_HEIGHT, 'bgf.jpg')
         self.graphBackground(self.BEAT_GRAPH_BG_X, self.BEAT_GRAPH_BG_Y, self.GRAPH_BG_WIDTH, self.GRAPH_BG_HEIGHT, 'bgf.jpg')
         self.graphBackground(self.MFCC_GRAPH_BG_X, self.MFCC_GRAPH_BG_Y, self.GRAPH_BG_WIDTH, self.GRAPH_BG_HEIGHT, 'bgf.jpg')
-        self.graphBackground(self.SUMMARY_DESC_X-15, self.IMPORT_BTN_Y+75, self.GRAPH_BG_WIDTH/2.6, 1.4*self.GRAPH_BG_HEIGHT, 'summarybg.jpg')
-        self.graphBackground(self.SUMMARY_DESC_X+25, self.IMPORT_BTN_Y+665, 160, 95, 'summarybg.jpg')
+        self.graphBackground(self.SUMMARY_DESC_X-15, self.SUMMARY_BG_Y, self.SUMMARY_BG_WIDTH, self.SUMMARY_BG_HEIGHT, 'summarybg.jpg')
+        self.graphBackground(self.PLAY_BG_X, self.PLAY_BG_Y, self.PLAY_BG_WIDTH, self.PLAY_BG_HEIGHT, 'summarybg.jpg')
 
-        self.createSummary(self.SUMMARY_DESC_X+30, self.IMPORT_BTN_Y+75, "---  BREAKDOWN  ---")
-        self.createBPM(self.SUMMARY_DESC_X, self.IMPORT_BTN_Y+150, "BPM: ")
-        self.createFREQ(self.SUMMARY_DESC_X, self.IMPORT_BTN_Y+200, "Max Freq: ")
-        self.trackSpecs(self.SUMMARY_DESC_X, self.IMPORT_BTN_Y+250)
+        self.createSummary(self.SUMMARY_BG_X, self.SUMMARY_BG_Y, "---  BREAKDOWN  ---")
+        self.createBPM(self.SUMMARY_DESC_X, self.SUMMARY_BG_Y+75, "BPM: ")
+        self.createFREQ(self.SUMMARY_DESC_X, self.SUMMARY_BG_Y+125, "Max Freq: ")
+        self.trackSpecs(self.SUMMARY_DESC_X, self.SUMMARY_BG_Y+175)
         
 
     def createMenu(self):
@@ -182,8 +190,11 @@ class MainWindow(QMainWindow):
 
     def openFile(self):
         name = QFileDialog.getOpenFileName(self, 'Open File')
-        self.getAudioMetrics(name[0])
-        self.playButton(self.SUMMARY_DESC_X+30, self.IMPORT_BTN_Y+670, 150, 85, name[0])
+        try:
+            self.getAudioMetrics(name[0])
+            self.playButton(self.SUMMARY_DESC_X+30, self.IMPORT_BTN_Y+670, 150, 85, name[0])
+        except:
+            print("No Audio Selected")
 
     def playFile(self, file):
         playsound(file)
