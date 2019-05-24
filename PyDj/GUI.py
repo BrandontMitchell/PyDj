@@ -163,17 +163,14 @@ class MainWindow(QMainWindow):
     def trackSpecs(self, x, y):
         self.trackLabel = QLabel("Track Name: ", self)
         self.artistLabel = QLabel("Artist: ", self)
-        self.albumLabel = QLabel("Album: ", self)
         self.genreLabel = QLabel("Genre: ", self)
 
         self.trackLabel.resize(1000, 20)
         self.trackLabel.move(x, y)
         self.artistLabel.resize(1000, 20)
         self.artistLabel.move(x, y+50)
-        self.albumLabel.resize(1000, 20)
-        self.albumLabel.move(x, y+100)
         self.genreLabel.resize(1000, 20)
-        self.genreLabel.move(x, y+150)
+        self.genreLabel.move(x, y+100)
         
 
     def suggestSongs(self, x, y, text):
@@ -210,14 +207,16 @@ class MainWindow(QMainWindow):
             self.content = f.readlines()
 
         image = self.content[random.randint(0, len(self.content)-1)]
-        filename = os.path.join("Assets", hashtag+".jpg")
+        filename = os.path.join("Assets\ArtistsImages", hashtag+".jpg")
         urllib.request.urlretrieve((image), filename)
-        self.importPicture(20, 700, image)
+        self.importPicture(20, 610, filename)
 
     def importPicture(self, x, y, image):
         self.artistPic = QLabel(self)
-        self.artistPic.setPixmap(QPixmap(os.path.join(image)))
+        self.artistPic.setPixmap(QPixmap(image))
+        print(image)
         self.artistPic.setGeometry(x, y, 240, 240)
+        self.artistPic.show()
 
 
 ##################      ANALYSIS     ##################
@@ -225,10 +224,13 @@ class MainWindow(QMainWindow):
     def getTitle(self):
         self.artist = self.artistLine.text()
         self.song = self.songLine.text()
+        self.artistLabel.setText("Artist: " + self.artist)
+        self.songLabel.setText("Track Name: " + self.song)
 
         self.ctx = ssl.create_default_context()
         self.ctx.check_hostname = False 
         self.ctx.verify_mode = ssl.CERT_NONE
+        
         url = 'https://www.instagram.com/explore/tags/' + self.artist.strip()
         self.getInfo(self.artist.strip(), url)
 
@@ -253,11 +255,8 @@ class MainWindow(QMainWindow):
             if int(tempo) in value:
                 genre = key
 
-        print('Estimated temp: {:.2f} beats per minute'.format(tempo))
-        print()
-        print(f'This falls under {genre} music')
-
         self.bpmLabel.setText("BPM: " + str(int(tempo)))
+        self.genreLabel.setText("Genre: " + genre)
         self.displayFreqGraph(y, sr, self.FREQ_GRAPH_X, self.FREQ_GRAPH_Y)
         self.displayPitchGraph(y, sr, self.PITCH_GRAPH_X, self.PITCH_GRAPH_Y)
         self.displayBeatGraph(y, sr, self.BEAT_GRAPH_X, self.BEAT_GRAPH_Y)
