@@ -252,7 +252,7 @@ class MainWindow(QMainWindow):
         self.ctx.check_hostname = False 
         self.ctx.verify_mode = ssl.CERT_NONE
 
-        url = 'https://www.instagram.com/explore/tags/' + self.artist.replace(" ", "")
+        url = 'https://www.instagram.com/explore/tags/' + self.artist.replace(" ", "") #hashtags have no spaces
         self.getInfo(self.artist.replace(" ", ""), url)
 
 
@@ -269,7 +269,7 @@ class MainWindow(QMainWindow):
             'Dubstep': range(140, 160),
             'Hardcore': range(160, 300)
         }
-        print("Beats frames" + str(beat_frames))
+
         # loops through genre dictionary to match bpm from input file
         # to a specific genre, helpful when mixing
         for key, value in genreDict.items():
@@ -285,10 +285,11 @@ class MainWindow(QMainWindow):
 
     def displayFreqGraph(self, arr, samplerate, x, y):
         librosa.display.waveplot(arr, sr=samplerate)
+        plt.title("Freq Detection")
         self.maxFreq = arr.max()
         self.freqLabel.setText("Max Freq: " + str(self.maxFreq))
         
-        plt.title("Freq Detection")
+        # Only way to resize figure
         mngr = plt.get_current_fig_manager()
         mngr.window.setGeometry(x+self.WINDOW_X_LOC, y + self.WINDOW_Y_LOC, self.GRAPH_WIDTH, self.GRAPH_HEIGHT)
         plt.tight_layout()
@@ -304,6 +305,7 @@ class MainWindow(QMainWindow):
         plt.title("Pitch Detection - Chromagram")
         plt.colorbar()
         
+        # Only way to resize figure
         mngr = plt.get_current_fig_manager()
         mngr.window.setGeometry(x+self.WINDOW_X_LOC, y + self.WINDOW_Y_LOC, self.GRAPH_WIDTH, self.GRAPH_HEIGHT)
         plt.tight_layout()
@@ -324,6 +326,7 @@ class MainWindow(QMainWindow):
         plt.axis('tight')
         plt.colorbar(format='%+02.0f dB')
 
+        # Only way to resize figure
         mngr = plt.get_current_fig_manager()
         mngr.window.setGeometry(x+self.WINDOW_X_LOC, y + self.WINDOW_Y_LOC, self.GRAPH_WIDTH, self.GRAPH_HEIGHT)
         plt.tight_layout()
@@ -339,19 +342,24 @@ class MainWindow(QMainWindow):
         librosa.display.specshow(mfcc)
         plt.ylabel('MFCC')
         plt.colorbar()
+
+        # Only way to resize figure
         mngr = plt.get_current_fig_manager()
         mngr.window.setGeometry(x+self.WINDOW_X_LOC, y + self.WINDOW_Y_LOC, self.GRAPH_WIDTH, self.GRAPH_HEIGHT)
         plt.tight_layout()
         plt.show()
 
-    def visualizeMetrics(self):
-        pass
 
+    # Handles file i/o and exiting application
     def newCall(self):
-        print("New")
+        self.artistLabel.setText("Artist: ")
+        self.trackLabel.setText("Track Name: ")
+        self.bpmLabel.setText("BPM: ")
+        self.genreLabel.setText("Genre: ")
+        self.artistPic.hide()
 
     def openCall(self):
-        print("Open")
+        self.openFile()
 
     def exitCall(self):
         sys.exit(app.exec_())
@@ -363,5 +371,3 @@ if __name__ == "__main__":
     ex = MainWindow()
     ex.show()
     sys.exit(app.exec_())
-
-
